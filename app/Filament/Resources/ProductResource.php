@@ -41,6 +41,7 @@ class ProductResource extends Resource {
     protected static ?string $model = Product::class;
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
     protected static ?string $navigationGroup = 'Shop';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form {
         return $form
@@ -176,13 +177,17 @@ class ProductResource extends Resource {
                             ->trueLabel('Only Visible Products')
                             ->falseLabel('Only Hidden Products')
                             ->native(condition: false)
-                                ,
+                            ,
                             SelectFilter::make('brand_id')
-                                ->relationship(name:'brand', titleAttribute: 'name')
+                            ->relationship(name: 'brand', titleAttribute: 'name')
                                 ,
                         ])
                         ->actions([
-                            Tables\Actions\EditAction::make(),
+                            Tables\Actions\ActionGroup::make([
+                                Tables\Actions\DeleteAction::make(),
+                                Tables\Actions\EditAction::make(),
+                                Tables\Actions\ViewAction::make(),
+                            ]),
                         ])
                         ->bulkActions([
                             Tables\Actions\BulkActionGroup::make([

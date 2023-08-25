@@ -20,6 +20,7 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\{
+    ColorColumn,
     IconColumn,
     TextColumn,
     ToggleColumn,
@@ -34,6 +35,7 @@ class BrandResource extends Resource {
     protected static ?string $model = Brand::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Shop';
+    protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form {
         return $form
@@ -60,10 +62,12 @@ class BrandResource extends Resource {
                                     ->unique(ignoreRecord: true)
                                     ,
                                     TextInput::make('url')
+                                    ->rules(['url'])
                                     ->columnSpan('full')
                                     ,
                                     ColorPicker::make('primary_hex')
                                     ->columnSpan('full')
+                                    ->label('Primary color')
                                         ,
                                 ])
                                 ->columns(2)
@@ -74,6 +78,7 @@ class BrandResource extends Resource {
                                 ->schema([
                                     Toggle::make('is_visible')
                                     ->label('Visibility')
+                                    ->helperText('Enable or disable brand visibility')
                                     ,
                                     MarkdownEditor::make('description')
                                     ->columnSpan('full')
@@ -88,18 +93,36 @@ class BrandResource extends Resource {
     public static function table(Table $table): Table {
         return $table
                         ->columns([
-                            TextColumn::make('name'),
+                            TextColumn::make('name')
+                            ->searchable()
+                            ->sortable()
+                            ,
                             TextColumn::make('slug'),
-                            TextColumn::make('url'),
-                            TextColumn::make('primary_hex'),
-                            IconColumn::make('is_visible')->boolean(),
+                            TextColumn::make('url')
+                            ->label('Website URL')
+                            ->searchable()
+                            ->sortable()
+                            ,
+                            ColorColumn::make('primary_hex')
+                            ->label('Primary color')
+                            ,
+                            IconColumn::make('is_visible')
+                            ->sortable()
+                            ->boolean()
+                                ,
                         ])
                         ->filters([
                                 //
                         ])
                         ->actions([
-                            Tables\Actions\EditAction::make(),
-                        ])
+                            Tables\Actions\ActionGroup::make([
+                                Tables\Actions\DeleteAction::make(),
+                                Tables\Actions\EditAction::make(),
+                                Tables\Actions\ViewAction::make(),
+                            ]),
+                                ]
+//                                , position: Tables\Enums\ActionsPosition::BeforeColumns,
+                        )
                         ->bulkActions([
                             Tables\Actions\BulkActionGroup::make([
                                 Tables\Actions\DeleteBulkAction::make(),
