@@ -86,7 +86,7 @@ class CategoryResource extends Resource {
     public static function table(Table $table): Table {
         return $table
                         ->columns([
-                            TextColumn::make('name'),
+                            TextColumn::make('name')->searchable(),
                             TextColumn::make('slug'),
                             TextColumn::make('parent.name'),
                             ToggleColumn::make('is_visible')

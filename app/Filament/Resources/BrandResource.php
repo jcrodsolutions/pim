@@ -16,6 +16,7 @@ use Filament\Forms\Components\{
     Toggle,
 };
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\{
@@ -26,6 +27,7 @@ use Filament\Tables\Columns\{
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Str;
 
 class BrandResource extends Resource {
 
@@ -42,13 +44,24 @@ class BrandResource extends Resource {
                                     TextInput::make('name')
                                     ->maxLength(50)
                                     ->required()
+                                    ->unique(ignoreRecord: true)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (string $operation, $state, Set $set) {
+                                        if ($operation != 'create') {
+                                            return;
+                                        }
+                                        $set('slug', Str::slug($state));
+                                    })
                                     ,
                                     TextInput::make('slug')
                                     ->required()
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->unique(ignoreRecord: true)
                                     ,
                                     TextInput::make('url')
                                     ->columnSpan('full')
-                                        ,
+                                    ,
                                     ColorPicker::make('primary_hex')
                                     ->columnSpan('full')
                                         ,
@@ -59,7 +72,9 @@ class BrandResource extends Resource {
                             Group::make()->schema([
                                 Section::make()
                                 ->schema([
-                                    Toggle::make('is_visible'),
+                                    Toggle::make('is_visible')
+                                    ->label('Visibility')
+                                    ,
                                     MarkdownEditor::make('description')
                                     ->columnSpan('full')
                                         ,
