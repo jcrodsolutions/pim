@@ -5,10 +5,14 @@ namespace App\Filament\Resources;
 use App\Enums\OrderStatusEnum;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
-use App\Models\Order;
+use App\Models\{
+    Order,
+    Product,
+};
 use Filament\Forms;
 use Filament\Forms\Components\{
     MarkdownEditor,
+    Repeater,
     Select,
     TextInput,
     Wizard,
@@ -54,13 +58,35 @@ class OrderResource extends Resource {
                                         'completed' => OrderStatusEnum::COMPLETED->value,
                                         'declined' => OrderStatusEnum::DECLINED->value,
                                     ])
+                                    ->columnSpanFull()
+                                    ->required()
                                     ,
                                     MarkdownEditor::make(name: 'notes')
                                     ->columnSpanFull()
                                         ,
-                                ]),
+                                ])->columns(columns: 2),
                                 Step::make(label: 'Order Items')->schema([
-//                                    TextInput::make('')
+                                    Repeater::make('items')
+                                    ->relationship()
+                                    ->schema([
+                                        Select::make('product_id')
+                                        ->label('Product')
+                                        ->options(Product::query()->pluck('name', 'id'))
+                                        ,
+                                        TextInput::make('quantity')
+                                        ->numeric()
+                                        ->default(1)
+                                        ->required()
+                                        ,
+                                        TextInput::make('unit_price')
+                                        ->label('Unit Price')
+                                        ->numeric()
+                                        ->step(0.01)
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->required()
+                                            ,
+                                    ])->columns(3),
                                 ]),
                             ])->columnSpanFull(),
         ]);

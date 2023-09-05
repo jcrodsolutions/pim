@@ -38,7 +38,7 @@ use Str;
 class CategoryResource extends Resource {
 
     protected static ?string $model = Category::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $navigationGroup = 'Shop';
 
     public static function form(Form $form): Form {
@@ -68,9 +68,10 @@ class CategoryResource extends Resource {
                             ])
                             ,
                             Group::make()->schema([
-                                Section::make(heading: 'Features')->schema([
+                                Section::make(heading: 'Status')->schema([
                                     Toggle::make('is_visible')
                                     ->label('Visibility')
+                                    ->helperText('Enable or disable category visibility')
                                     ->default(true)
                                         ,
                                 ]),
@@ -86,18 +87,33 @@ class CategoryResource extends Resource {
     public static function table(Table $table): Table {
         return $table
                         ->columns([
-                            TextColumn::make('name')->searchable(),
+                            TextColumn::make('name')
+                            ->sortable()
+                            ->searchable()
+                            ,
                             TextColumn::make('slug'),
-                            TextColumn::make('parent.name'),
+                            TextColumn::make('parent.name')
+                            ->sortable()
+                            ->searchable()
+                            ,
                             ToggleColumn::make('is_visible')
                             ->label('Visibility')
-                                ,
+                            ->sortable()
+                            ,
+                            TextColumn::make('updated_at')
+                            ->date()
+                            ->label('Updated Date')
+                            ->sortable()
                         ])
                         ->filters([
                                 //
                         ])
                         ->actions([
-                            Tables\Actions\EditAction::make(),
+                            Tables\Actions\ActionGroup::make([
+                                Tables\Actions\DeleteAction::make(),
+                                Tables\Actions\EditAction::make(),
+                                Tables\Actions\ViewAction::make(),
+                            ]),
                         ])
                         ->bulkActions([
                             Tables\Actions\BulkActionGroup::make([

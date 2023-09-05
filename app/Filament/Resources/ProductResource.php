@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Illuminate\Database\Eloquent\Model;
 use App\Enums\ProductTypeEnum;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
@@ -42,6 +43,19 @@ class ProductResource extends Resource {
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
     protected static ?string $navigationGroup = 'Shop';
     protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'name'; // this should be an actual column name that exists in the model
+
+    public static function getGloballySearchableAttributes(): array {
+        return ['name', 'slug', 'description']; //relationships can be used with dot(.) notation but its use is not recommended
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array {
+        return [
+            'Brand' => $record->brand->name,
+        ];
+        
+        // voy por 05:35 de  https://www.youtube.com/watch?v=rOeV7PhLJxs
+    }
 
     public static function form(Form $form): Form {
         return $form
