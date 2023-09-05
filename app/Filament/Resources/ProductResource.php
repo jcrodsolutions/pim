@@ -52,9 +52,10 @@ class ProductResource extends Resource {
     public static function getGlobalSearchResultDetails(Model $record): array {
         return [
             'Brand' => $record->brand->name,
+//            'Description' => $record->description,
         ];
         
-        // voy por 05:35 de  https://www.youtube.com/watch?v=rOeV7PhLJxs
+        // voy por 07:09 de  https://www.youtube.com/watch?v=rOeV7PhLJxs
     }
 
     public static function form(Form $form): Form {
