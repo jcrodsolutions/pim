@@ -44,6 +44,17 @@ class ProductResource extends Resource {
     protected static ?string $navigationGroup = 'Shop';
     protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'name'; // this should be an actual column name that exists in the model
+    protected static int $globalSearchResultsLimit = 20;
+
+//    to Bind a key like Ctrl-K to focus on search box, go to AdminPanelProvider.
+//    protected static ?string $activeNavigationIcon = 'heroicon-o-check-badge';  // esto es por si se me ocurre quererlo
+
+    
+    //voy por minuto 2:00 de https://www.youtube.com/watch?v=mEfkoeEirrM
+    
+    public static function getNavigationBadge(): ?string {
+        return static::getModel()::count();
+    }
 
     public static function getGloballySearchableAttributes(): array {
         return ['name', 'slug', 'description']; //relationships can be used with dot(.) notation but its use is not recommended
@@ -54,8 +65,10 @@ class ProductResource extends Resource {
             'Brand' => $record->brand->name,
 //            'Description' => $record->description,
         ];
-        
-        // voy por 07:09 de  https://www.youtube.com/watch?v=rOeV7PhLJxs
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder {
+        return parent::getGlobalSearchEloquentQuery()->with(['brand']);
     }
 
     public static function form(Form $form): Form {
