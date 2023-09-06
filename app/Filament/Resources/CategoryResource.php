@@ -40,6 +40,7 @@ class CategoryResource extends Resource {
     protected static ?string $model = Category::class;
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $navigationGroup = 'Shop';
+//    protected static bool $shouldRegisterNavigation = false;  // Esto es por si no deseo que se muetre en el sidebar
 
     public static function form(Form $form): Form {
         return $form

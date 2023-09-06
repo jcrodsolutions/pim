@@ -48,9 +48,6 @@ class ProductResource extends Resource {
 
 //    to Bind a key like Ctrl-K to focus on search box, go to AdminPanelProvider.
 //    protected static ?string $activeNavigationIcon = 'heroicon-o-check-badge';  // esto es por si se me ocurre quererlo
-
-    
-    //voy por minuto 2:00 de https://www.youtube.com/watch?v=mEfkoeEirrM
     
     public static function getNavigationBadge(): ?string {
         return static::getModel()::count();
