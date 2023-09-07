@@ -23,6 +23,8 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider {
+    
+    // voy por https://www.youtube.com/watch?v=f2hzXI4Af10&ab_channel=CodeWithDary
 
     public function panel(Panel $panel): Panel {
         return $panel
