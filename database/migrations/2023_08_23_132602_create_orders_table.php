@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->nullable(false)->cascadeOnDelete();
             $table->string('order',50)->unique()->nullable(false);
-            $table->decimal('total_price',10,2)->nullable(false);
+            $table->decimal('total_price',10,2)->default(0)->nullable(false); // jcr: maybe not needed ..maybe for totals control vs detail
             $table->enum('status',['pending','processing','completed','declined'])
                     ->default('pending')
                     ->nullable(false);

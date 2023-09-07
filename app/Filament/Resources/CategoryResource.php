@@ -4,7 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
-use App\Models\Category;
+use App\Models\{
+    Category,
+    Product,
+};
 use Filament\Forms;
 use Filament\Forms\Components\{
 //    DatePicker,
@@ -40,6 +43,7 @@ class CategoryResource extends Resource {
     protected static ?string $model = Category::class;
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $navigationGroup = 'Shop';
+
 //    protected static bool $shouldRegisterNavigation = false;  // Esto es por si no deseo que se muetre en el sidebar
 
     public static function form(Form $form): Form {
@@ -128,7 +132,7 @@ class CategoryResource extends Resource {
 
     public static function getRelations(): array {
         return [
-                //
+            RelationManagers\ProductsRelationManager::class,
         ];
     }
 

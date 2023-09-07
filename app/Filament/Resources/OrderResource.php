@@ -12,6 +12,7 @@ use App\Models\{
 use Filament\Forms;
 use Filament\Forms\Components\{
     MarkdownEditor,
+    Placeholder,
     Repeater,
     Select,
     TextInput,
@@ -19,6 +20,7 @@ use Filament\Forms\Components\{
     Wizard\Step,
 };
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\{
@@ -43,15 +45,13 @@ class OrderResource extends Resource {
         return static::getModel()::where('status', 'processing')->count() > 10 ? 'warning' : 'primary'
         ;
     }
-    
-    
 
     public static function form(Form $form): Form {
         return $form
                         ->schema([
                             Wizard::make([
                                 Step::make(label: 'Order Details')->schema([
-                                    TextInput::make('number')
+                                    TextInput::make('order')
                                     ->default(state: 'OR-' . random_int(100000, 999999))
                                     ->disabled()
                                     ->dehydrated()
@@ -62,14 +62,19 @@ class OrderResource extends Resource {
                                     ->searchable()
                                     ->required()
                                     ,
-                                    Select::make(name: 'type')
+                                    TextInput::make(name: 'shipping_price')
+                                    ->label(label: 'Shipping Costs')
+                                    ->dehydrated()
+                                    ->numeric()
+                                    ->required()
+                                    ,
+                                    Select::make(name: 'status')
                                     ->options([
                                         'pending' => OrderStatusEnum::PENDING->value,
                                         'processing' => OrderStatusEnum::PROCESSING->value,
                                         'completed' => OrderStatusEnum::COMPLETED->value,
                                         'declined' => OrderStatusEnum::DECLINED->value,
                                     ])
-                                    ->columnSpanFull()
                                     ->required()
                                     ,
                                     MarkdownEditor::make(name: 'notes')
@@ -83,10 +88,16 @@ class OrderResource extends Resource {
                                         Select::make('product_id')
                                         ->label('Product')
                                         ->options(Product::query()->pluck('name', 'id'))
+                                        ->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(fn($state, Set $set) =>
+                                                $set('unit_price', Product::find($state)->price ?? 0))
                                         ,
                                         TextInput::make('quantity')
                                         ->numeric()
                                         ->default(1)
+                                        ->live()
+                                        ->dehydrated()
                                         ->required()
                                         ,
                                         TextInput::make('unit_price')
@@ -96,8 +107,13 @@ class OrderResource extends Resource {
                                         ->disabled()
                                         ->dehydrated()
                                         ->required()
-                                            ,
-                                    ])->columns(3),
+                                        ,
+                                        Placeholder::make(name: 'total_price')
+                                        ->label('Total Price')
+                                        ->content(function ($get) {
+                                            return $get('quantity') * $get('unit_price');
+                                        })
+                                    ])->columns(4),
                                 ]),
                             ])->columnSpanFull(),
         ]);

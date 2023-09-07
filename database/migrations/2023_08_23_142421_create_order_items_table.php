@@ -20,8 +20,8 @@ return new class extends Migration
                     ->cascadeOnDelete();
             $table->decimal('unit_price',10,2)->nullable(false);
             $table->unsignedBigInteger('quantity',10,4)->autoIncrement(false)->nullable(false);
-            $table->decimal('tax',10,2)->nullable(false);
-            $table->decimal('total',10,2)->nullable(false);
+            $table->decimal('tax',10,2)->default(0)->nullable(false);
+            $table->decimal('total',10,2)->default(0)->nullable(false);
             $table->timestamps();
         });
     }
