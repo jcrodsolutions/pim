@@ -23,7 +23,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider {
-    
+
     // voy por https://www.youtube.com/watch?v=f2hzXI4Af10&ab_channel=CodeWithDary
 
     public function panel(Panel $panel): Panel {
@@ -56,6 +56,9 @@ class AdminPanelProvider extends PanelProvider {
                             'logout' => MenuItem::make()->label('Logout') // Customize logout label.
                         ])
 //                        ->breadcrumbs(condition: false)  // enable/disable breadcrumbs visibility
+                        ->plugins([
+                            \pxlrbt\FilamentSpotlight\SpotlightPlugin::make(),  // composer require pxlrbt/filament-spotlight
+                        ])
                         ->font(family: 'Poppins')
                         ->favicon(url: asset('images/favicon.png'))
                         ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

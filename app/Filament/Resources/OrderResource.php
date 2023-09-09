@@ -122,7 +122,8 @@ class OrderResource extends Resource {
     public static function table(Table $table): Table {
         return $table
                         ->columns([
-                            TextColumn::make('numer')
+                            TextColumn::make('order')
+                            ->label('Order Number')
                             ->searchable()
                             ->sortable()
                             ,
@@ -162,6 +163,7 @@ class OrderResource extends Resource {
                         ])
                         ->bulkActions([
                             Tables\Actions\BulkActionGroup::make([
+                                \pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction::make(), // composer require pxlrbt/filament-excel
                                 Tables\Actions\DeleteBulkAction::make(),
                             ]),
                         ])

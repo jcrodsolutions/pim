@@ -7,6 +7,7 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\{
+    Section,
     TextInput,
 };
 use Filament\Forms\Form;
@@ -16,60 +17,88 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Carbon\Carbon;
 
-class UserResource extends Resource
-{
+class UserResource extends Resource {
+
     protected static ?string $model = User::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    public static function form(Form $form): Form
-    {
-        
-        return $form
-            ->schema([
-                TextInput::make('name'),
-                TextInput::make('email'),
-                TextInput::make('password')->type('password')->confirmed(),
-            ]);
+    public static function getNavigationBadge(): ?string {
+        return static::getModel()::where('created_at', '>', Carbon::now()->addDays(-5))->count();
     }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('email'),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
-            ]);
+    public static function form(Form $form): Form {
+
+        return $form
+                        ->schema([
+                            Section::make(heading: 'User Details')->schema([
+                                TextInput::make('name')
+                                ->required()
+                                ,
+                                TextInput::make('email')
+                                ->required()
+                                    ,
+                            ])->columns(2),
+                            Section::make(heading: 'Change Password')->schema([
+                                TextInput::make('password')
+                                ->type('password')
+                                ->confirmed()
+                                ->dehydrated()
+                                    ,
+                            ])->columns(2),
+        ]);
     }
-    
-    public static function getRelations(): array
-    {
+
+    public static function table(Table $table): Table {
+        return $table
+                        ->columns([
+                            TextColumn::make('name')
+                            ->label('Name')
+                            ->sortable()
+                            ->searchable()
+                            ,
+                            TextColumn::make('email')
+                            ->label('Email')
+                            ->sortable()
+                            ->searchable()
+                            ,
+                            TextColumn::make('created_at')
+                            ->label('Creation Date')
+                            ->sortable()
+                                ,
+                        ])
+                        ->filters([
+                                //
+                        ])
+                        ->actions([
+                            Tables\Actions\ActionGroup::make([
+                                Tables\Actions\ViewAction::make(),
+                                Tables\Actions\EditAction::make(),
+                                Tables\Actions\DeleteAction::make(),
+                            ]),
+                        ])
+                        ->bulkActions([
+                            Tables\Actions\BulkActionGroup::make([
+                                Tables\Actions\DeleteBulkAction::make(),
+                            ]),
+                        ])
+                        ->emptyStateActions([
+                            Tables\Actions\CreateAction::make(),
+        ]);
+    }
+
+    public static function getRelations(): array {
         return [
-            //
+                //
         ];
     }
-    
-    public static function getPages(): array
-    {
+
+    public static function getPages(): array {
         return [
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
-    }    
+    }
 }
