@@ -22,7 +22,11 @@ class DatabaseSeeder extends Seeder {
             BrandsSeeder::class,
             CategoriesSeeder::class,
             
-            ProductsSeeder::class,
+            StoresGroupSeeder::class,
+            StoresSeeder::class,
+            
+            UmsSeeder::class,
+//            ProductsSeeder::class,
         ]);
     }
 }

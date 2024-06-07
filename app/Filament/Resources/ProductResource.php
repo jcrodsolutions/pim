@@ -72,100 +72,13 @@ class ProductResource extends Resource {
         return $form
                         ->schema([
                             Group::make()->schema([
-                                Section::make()->schema([
-                                    TextInput::make('slug')
-                                    ->required()
-                                    ->disabled()
-                                    ->dehydrated()
-                                    ->unique(ignoreRecord: true)
-                                    ,
-                                    TextInput::make('name')
-                                    ->maxLength(60)
-                                    ->required()
-                                    ->unique(ignoreRecord: true)
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (string $operation, $state, Set $set) {
-                                        if ($operation != 'create') {
-                                            return;
-                                        }
-                                        $set('slug', Str::slug($state));
-                                    })
-                                    ,
-                                    MarkdownEditor::make('description')
-                                    ->columnSpan('full')
-                                        ,
-                                ])
-                                ->columns(2)
-                                ,
-                                Section::make(heading: 'Pricing & Inventory')->schema([
-                                    TextInput::make('sku')
-                                    ->maxLength(20)
-                                    ->label('SKU (Stock Keeping Unit)')
-                                    ->unique(ignoreRecord: true)
-                                    ->required()
-                                    ,
-                                    TextInput::make('price')
-                                    ->numeric()
-                                    ->step(0.01)
-                                    ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
-                                    ->required()
-                                    ,
-                                    TextInput::make('quantity')
-                                    ->numeric()
-                                    ->step(0.01)
-//                                    ->rules(['integer', 'min:0'])
-                                    ->minValue(0)
-//                                    ->maxValue(10000)
-                                    ,
-                                    Select::make('type')
-                                    ->options([
-                                        'downloadable' => ProductTypeEnum::DOWNLOADABLE->value,
-                                        'deliverable' => ProductTypeEnum::DELIVERABLE->value,
-                                    ]),
-                                ])
-                                ->columns(2)
-                                    ,
+                                self::getGeneralInfoForm(),
+//                                self::getPricingAndInfoForm(),
                             ]),
                             Group::make()->schema([
-                                Section::make(heading: 'Status')->schema([
-                                    Toggle::make('is_visible')
-                                    ->label('Visibility')
-                                    ->helperText('Enable/Disable Product Visibility')
-                                    ->default(true)
-                                    ,
-                                    Toggle::make('is_featured')
-                                    ->label('Featured')
-                                    ->helperText('Enable/Disable Featured Status for the product')
-                                    ,
-                                    DatePicker::make('published_at')
-                                    ->label('Available from')
-                                    ->default(now())
-                                    ->columnSpan('full')
-                                        ,
-                                ])
-                                ->columns(2)
-                                ,
-                                Section::make(heading: 'Image')->schema([
-                                    FileUpload::make('image')
-                                    ->directory(directory: 'form-attachments')
-                                    ->preserveFilenames()
-                                    ->image()
-                                    ->imageEditor()
-                                        ,
-                                ])
-                                ->collapsible()
-                                ,
-                                Section::make(heading: 'Associations')->schema([
-                                    Select::make('brand_id')
-                                    ->relationship(name: 'brand', titleAttribute: 'name')
-                                    ->required()
-                                    ,
-                                    Select::make(name: 'categories')
-                                    ->relationship(name: 'categories', titleAttribute: 'name')
-                                    ->multiple()
-                                    ->required()
-                                        ,
-                                ]),
+                                self::getStatusForm(),
+                                self::getImageForm(),
+                                self::getAssociationsForm(),
                             ]),
         ]);
     }
@@ -175,6 +88,10 @@ class ProductResource extends Resource {
                         ->columns([
                             ImageColumn::make('image'),
                             TextColumn::make('name')
+                            ->searchable()
+                            ->sortable()
+                            ,
+                            TextColumn::make('material')
                             ->searchable()
                             ->sortable()
                             ,
@@ -232,7 +149,7 @@ class ProductResource extends Resource {
 
     public static function getRelations(): array {
         return [
-                //
+            RelationManagers\SkusRelationManager::class,
         ];
     }
 
@@ -242,5 +159,125 @@ class ProductResource extends Resource {
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    private static function getGeneralInfoForm(): Section {
+        return Section::make(heading: 'General Info')->schema([
+                            TextInput::make('name')
+                            ->maxLength(60)
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function (string $operation, $state, Set $set) {
+                                if ($operation != 'create') {
+                                    return;
+                                }
+                                $set('slug', Str::slug($state));
+                            })
+                            ->columnSpan(2)
+                            ,
+                            TextInput::make('material')
+                            ->required()
+//                                    ->disabled()
+                            ->unique(ignoreRecord: true)
+                            ->maxlength(20)
+                            ,
+                            TextInput::make('slug')
+                            ->required()
+                            ->disabled()
+                            ->dehydrated()
+                            ->unique(ignoreRecord: true)
+                            ,
+                            MarkdownEditor::make('description')
+                            ->columnSpan('full')
+                            ,
+                            Select::make('type')
+                            ->options([
+                                'downloadable' => ProductTypeEnum::DOWNLOADABLE->value,
+                                'deliverable' => ProductTypeEnum::DELIVERABLE->value,
+                            ])
+                                ,
+                        ])
+                        ->columns(2);
+    }
+
+    private static function getPricingAndInfoForm(): Section {
+        return Section::make(heading: 'Pricing & Inventory')->schema([
+                            TextInput::make('sku')
+                            ->maxLength(20)
+                            ->label('SKU (Stock Keeping Unit)')
+                            ->unique(ignoreRecord: true)
+                            ->required()
+                            ,
+                            TextInput::make('price')
+                            ->numeric()
+                            ->step(0.01)
+                            ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
+                            ->required()
+                            ,
+                            TextInput::make('quantity')
+                            ->numeric()
+                            ->step(0.01)
+//                                    ->rules(['integer', 'min:0'])
+                            ->minValue(0)
+//                                    ->maxValue(10000)
+                            ,
+                            Select::make('type')
+                            ->options([
+                                'downloadable' => ProductTypeEnum::DOWNLOADABLE->value,
+                                'deliverable' => ProductTypeEnum::DELIVERABLE->value,
+                            ]),
+                        ])
+                        ->columns(2);
+    }
+
+    private static function getStatusForm(): Section {
+        return Section::make(heading: 'Status')->schema([
+                            Toggle::make('is_visible')
+                            ->label('Visibility')
+                            ->helperText('Enable/Disable Product Visibility')
+                            ->default(true)
+                            ,
+                            Toggle::make('is_featured')
+                            ->label('Featured')
+                            ->helperText('Enable/Disable Featured Status for the product')
+                            ,
+                            DatePicker::make('published_at')
+                            ->label('Available from')
+                            ->default(now())
+                            ->columnSpan('full')
+                                ,
+                        ])
+                        ->columns(2)
+                        ->collapsed()
+                        ->collapsible()
+        ;
+    }
+
+    private static function getImageForm(): Section {
+        return Section::make(heading: 'Image')->schema([
+                            FileUpload::make('image')
+                            ->directory(directory: 'form-attachments')
+                            ->preserveFilenames()
+                            ->image()
+                            ->imageEditor()
+                                ,
+                        ])
+                        ->collapsed()
+                        ->collapsible();
+    }
+
+    private static function getAssociationsForm(): Section {
+        return Section::make(heading: 'Associations')->schema([
+                            Select::make('brand_id')
+                            ->relationship(name: 'brand', titleAttribute: 'name')
+                            ->required()
+                    ,
+                            Select::make(name: 'categories')
+                            ->relationship(name: 'categories', titleAttribute: 'name')
+                            ->multiple()
+                            ->required()
+                        ,
+        ]);
     }
 }

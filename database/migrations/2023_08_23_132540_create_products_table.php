@@ -15,7 +15,7 @@ return new class extends Migration
                     ->nullable(false)
                     ->cascadeOnDelete();
             $table->string('name',60)->nullable(false);
-            $table->string('slug',100)->unique()->nullable(false);
+            $table->string('slug',100)->unique()->nullable(true);
             $table->string('material',20)->unique()->nullable(false);
             $table->longtext('description')->nullable();
             $table->string('image',150)->nullable();
